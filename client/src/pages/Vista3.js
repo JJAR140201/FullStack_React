@@ -1,0 +1,85 @@
+import { useState, useEffect } from "react";
+import Axios from "axios";
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+
+const Vista3 = () => {
+    const [users, setUsers] = useState([]);
+
+    useEffect(() => {
+        Axios.get('http://localhost:3001/vista3')
+            .then(response => {
+                setUsers(response.data);
+            })
+            .catch(error => {
+                console.error('No se pudo obtener los datos', error);
+            });
+    }, []);
+
+    const [datos, setDatos] = useState({
+        fecha_inicio: '',
+        fecha_final: ''
+    })
+
+    const handleInputChange = (event) => {
+        setDatos({
+            ...datos,
+            [event.target.name]: event.target.value
+        })
+    }
+
+    const enviarDatos = (event) => {
+        event.preventDefault()
+        console.log('enviando datos...' + datos.fecha_inicio + ' ' + datos.fecha_final)
+        let json = { fecha_inicio: datos.fecha_inicio, fecha_final: datos.fecha_final }
+        Axios.post('http://localhost:3001/vista3', json)
+            .then(response => {
+                console.log(response)
+                setUsers(response.data);
+            })
+            .catch(error => {
+                console.error('No se pudo obtener los datos', error);
+            });
+    }
+
+    return (
+        <div className="Vista1">
+            <form className="row" onSubmit={enviarDatos}>
+                <div className="col-md-3">
+                    <input type="date" placeholder="Fecha inicio" className="form-control" onChange={handleInputChange} name="fecha_inicio"></input>
+                </div>
+                <div className="col-md-3">
+                    <input type="date" placeholder="Fecha final" className="form-control" onChange={handleInputChange} name="fecha_final"></input>
+                </div>
+                <button type="submit" className="btn btn-primary">Enviar</button>
+            </form>
+            <TableContainer component={Paper}>
+                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell align="center">Tramo</TableCell>
+                            <TableCell align="center">Cliente</TableCell>
+                            <TableCell align="center">TotalPerdidas</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {users.map(user => (
+                            <TableRow key={user.ID}>
+                                <TableCell align="center">{user.Tramo}</TableCell>
+                                <TableCell align="center">{user.Cliente}</TableCell>
+                                <TableCell align="center">{user.TotalPerdidas}</TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </div>
+    );
+}
+
+export default Vista3;
